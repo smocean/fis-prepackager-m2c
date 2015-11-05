@@ -1,2 +1,0 @@
-#!/usr/bin/env node
-require('../m2c.js')(process.argv);
