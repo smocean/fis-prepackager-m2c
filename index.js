@@ -24,6 +24,7 @@ module.exports = function(ret, conf, settings, opt) {
 	settings.options['optimizer'] = !!opt.optimize;
 
 	alp_conf = fis.util.merge(alp_conf, settings.options)
+	alp_conf.isBaseRoot = true;
 
 	alp.config.merge(alp_conf);
 
@@ -40,7 +41,7 @@ module.exports = function(ret, conf, settings, opt) {
 		if (!fis.util.isEmpty(_cache)) {
 			file.setContent(_cache.content);
 
-			file.ext !== '.html' && file.ext !== '.htm' && (ret.map.res[id].adeps = _cache.map.adeps);
+			file.ext !== '.html' && file.ext !== '.htm' && ret.map.res[id] && (ret.map.res[id].adeps = _cache.map.adeps);
 
 		} else {
 			if (file.ext !== '.html' && file.ext !== '.htm') {
@@ -85,8 +86,8 @@ module.exports = function(ret, conf, settings, opt) {
 
 	for (var k in result) {
 		cache.write(k, result[k]);
-		ret.ids[k].setContent(result[k].content);
-		ret.map.res[k].adeps = result[k].map.adeps;
+		ret.ids[k] && ret.ids[k].setContent(result[k].content);
+		ret.map.res[k] && (ret.map.res[k].adeps = result[k].map.adeps);
 	}
 
 
