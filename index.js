@@ -10,9 +10,6 @@ function regExpFunc(word) {
 		return new RegExp('<!--\\s*\\b' + word + '\\b\\s*\\(\\s*[\'\"]{1}([^\'\"]*)(?=' + depName + ')' + depName + '\\s*[\'\"]{1}\\s*\\)\\s*-->', 'gi');
 	}
 }
-
-
-
 module.exports = function(ret, conf, settings, opt) {
 	var alp_conf = {},
 		cache = new Cache(!!opt.optimize),
@@ -24,7 +21,7 @@ module.exports = function(ret, conf, settings, opt) {
 	settings.options['optimizer'] = !!opt.optimize;
 
 	alp_conf = fis.util.merge(alp_conf, settings.options)
-	alp_conf.isBaseRoot = true;
+	alp_conf.useBaseInJsFile = true;
 
 	alp.config.merge(alp_conf);
 
