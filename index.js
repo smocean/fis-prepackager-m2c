@@ -4,6 +4,7 @@ var alp = require('alpaca-sm');
 
 var pth = require('path');
 
+var hParser = require('./lib/htmlParse.js');
 
 function regExpFunc(word) {
 	return function(depName) {
@@ -22,16 +23,12 @@ module.exports = function(ret, conf, settings, opt) {
 
 	alp_conf = fis.util.merge(alp_conf, settings.options)
 	alp_conf.useBaseInJsFile = true;
-
+	alp_conf.base = fis.project.getProjectPath();
 	alp.config.merge(alp_conf);
-
-	if (opt.clean) {
-		cache.clean();
-	}
 
 	fis.util.map(ret.src, function(id, file) {
 		var _cache, htmlDepsObj, htmlAdeps, hAdeps = [],
-			hDeps, hObj, regExp, hCache;
+			hDeps, hObj, regExp, hCache, _result = {};
 
 		id = id.replace(/^[\/]*/, '');
 		_cache = cache.read(id);
@@ -42,9 +39,12 @@ module.exports = function(ret, conf, settings, opt) {
 
 		} else {
 			if (file.ext !== '.html' && file.ext !== '.htm') {
-				fis.util.merge(result, parseNonHtml(file.fullname));
+				_result = parseNonHtml(file.fullname);
 			} else {
-				hDepsObj = alp.txtParse.parse({
+
+				_result = hParser(id, file, ret, alp_conf);
+
+				/*hDepsObj = alp.txtParse.parse({
 					src: file.fullname,
 					cnt: function() {
 						return file.getContent();
@@ -67,30 +67,29 @@ module.exports = function(ret, conf, settings, opt) {
 						regExp = getRegExp(hObj.raw);
 						file.setContent(modifyHtmlContent(file.getContent(), file.fullname, _id, regExp, htmlAdeps));
 					}
-				}
-				
-				cache.write(id, {
-					content: file.getContent(),
-					map: {
-						deps: hDeps,
-						adeps: hAdeps,
-						base:alp.config.get('base')
-					}
-				});
+				}*/
+				file.setContent(_result[id].content);
 			}
+			fis.util.merge(result, _result);
 		}
 	});
 
-	for (var k in result) {
-		cache.write(k, result[k]);
-		ret.ids[k] && ret.ids[k].setContent(result[k].content);
-		ret.map.res[k] && (ret.map.res[k].adeps = result[k].map.adeps);
-	}
 
+	writeCache(result);
 
 	cache.flush();
 
-	function modifyHtmlContent(content, fullname, id,regExp, htmlAdeps) {
+	function writeCache(result, file) {
+		for (var k in result) {
+			cache.write(k, result[k]);
+			ret.ids[k] && ret.ids[k].setContent(result[k].content);
+			ret.map.res[k] && (ret.map.res[k].adeps = result[k].map.adeps);
+		}
+
+
+	}
+
+	function modifyHtmlContent(content, fullname, id, regExp, htmlAdeps) {
 
 		return content.replace(regExp, function() {
 			var map = htmlAdeps;
