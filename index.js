@@ -17,13 +17,17 @@ module.exports = function(ret, conf, settings, opt) {
 		result = {},
 		jsTmpl = settings.tmpl.js,
 		cssTmpl = settings.tmpl.css,
-		getRegExp = regExpFunc(settings.options.word || 'require');
+		getRegExp = regExpFunc(settings.options.word || 'require'),
+
+		allFiles = {};
 
 	settings.options['optimizer'] = !!opt.optimize;
 
 	alp_conf = fis.util.merge(alp_conf, settings.options)
 	alp_conf.useBaseInJsFile = true;
 	alp_conf.base = fis.project.getProjectPath();
+	alp_conf.readcss = false;
+	alp_conf.readcssInHtml = false;
 	alp.config.merge(alp_conf);
 
 	fis.util.map(ret.src, function(id, file) {
@@ -31,8 +35,28 @@ module.exports = function(ret, conf, settings, opt) {
 			hDeps, hObj, regExp, hCache, _result = {};
 
 		id = id.replace(/^[\/]*/, '');
+
+		allFiles[id] = {
+			file: file,
+			rawContent: file.getContent()
+		};
 		_cache = cache.read(id);
+		//解决文件内容依赖其它文件的情况比如使用了inline方式
+		if (file.cache && !fis.util.isEmpty(file.cache.deps) && !fis.util.isEmpty(_cache) && fis.util.md5(file.getContent()) != _cache.md5) {
+
+			_cache = {};
+		}
+		//解决css可读时,若js中使用了require('/xx.css')，js就不使用cache.
+		/*if(!fis.util.isEmpty(_cache) && (alp.config.get('readcss') && file.isJsLike || alp.config.get('readcssInHtml') && file.isHtmlLike)){
+			if(/((\.less)|(\.s?css)|\.(sass)|(\.styl))/.test(file.requires.join(','))){
+				_cache = {};
+				console.log(file.basename);
+			}
+		}*/
+
+
 		if (!fis.util.isEmpty(_cache)) {
+			file.rawContent = file.getContent();
 			file.setContent(_cache.content);
 
 			file.ext !== '.html' && file.ext !== '.htm' && ret.map.res[id] && (ret.map.res[id].adeps = _cache.map.adeps);
@@ -43,31 +67,6 @@ module.exports = function(ret, conf, settings, opt) {
 			} else {
 
 				_result = hParser(id, file, ret, alp_conf);
-
-				/*hDepsObj = alp.txtParse.parse({
-					src: file.fullname,
-					cnt: function() {
-						return file.getContent();
-					}
-				});
-				hDeps = hDepsObj.deps;
-				htmlDepsObj = hDepsObj.obj;
-
-				if (!fis.util.isEmpty(htmlDepsObj)) {
-					for (var _id in htmlDepsObj) {
-						hObj = htmlDepsObj[_id];
-						hCache = cache.read(_id);
-						if (!fis.util.isEmpty(hCache)) {
-							htmlAdeps = hCache.map.adeps;
-						} else {
-							fis.util.merge(result, parseNonHtml(hObj.absUrl));
-							htmlAdeps = result[_id].map.adeps;
-						}
-						hAdeps = hAdeps.concat(htmlAdeps);
-						regExp = getRegExp(hObj.raw);
-						file.setContent(modifyHtmlContent(file.getContent(), file.fullname, _id, regExp, htmlAdeps));
-					}
-				}*/
 				file.setContent(_result[id].content);
 			}
 			fis.util.merge(result, _result);
@@ -78,15 +77,36 @@ module.exports = function(ret, conf, settings, opt) {
 	writeCache(result);
 
 	cache.flush();
-
+	/**
+	 * 写入缓存，同事更新fis的缓存
+	
+	 */
 	function writeCache(result, file) {
 		for (var k in result) {
-			cache.write(k, result[k]);
+			cache.write(k, result[k], function(k, content) {
+				var file, dep = {},
+					aFile,
+					fullname, timestamp;
+				deps = content.map.adeps;
+
+				aFile = allFiles[k];
+				file = aFile.file;
+				for (var i = 0, len = deps.length, _dep, _file; i < len; i++) {
+					_dep = deps[i];
+
+					file.cache.addDeps(_dep);
+
+				}
+
+				deps.length && file.cache.save(aFile.rawContent, {
+					requires: file.requires,
+					extras: file.extras
+				});
+
+			});
 			ret.ids[k] && ret.ids[k].setContent(result[k].content);
 			ret.map.res[k] && (ret.map.res[k].adeps = result[k].map.adeps);
 		}
-
-
 	}
 
 	function modifyHtmlContent(content, fullname, id, regExp, htmlAdeps) {
@@ -129,7 +149,7 @@ module.exports = function(ret, conf, settings, opt) {
 				var content, retObj;
 				retObj = ret.ids[relsrc];
 				if (retObj) {
-					return retObj.getContent();
+					return retObj.rawContent || retObj.getContent();
 				} else {
 					return fis.util.read(src).toString();
 				}

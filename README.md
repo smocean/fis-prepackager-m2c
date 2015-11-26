@@ -32,11 +32,8 @@ options:常用的一些设置主要有：
 
 	1、ns:命名空间，模块化代码转成闭包后使用的命名空间，默认'alp'。
 
-	2、readcss:主要针对出现在js中的require('./xx.css')处理方式,默认true。true：读取css文件的内容并写入到js中；false:不读取css文件的内容,而是分析依赖。
+	2、exclude:排除一些已存在的使用require关键字的文件，比如用webpack或browerify打包的文件。
 	
-	3、exclude:排除一些已存在的使用require关键字的文件，比如用webpack或browerify打包的文件。
-	
-	4、readcssInHtml:出现在html中的script标签中的css是否可读,同readcss
 
 ## 在项目中使用
 
