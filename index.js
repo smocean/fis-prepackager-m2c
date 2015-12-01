@@ -32,11 +32,12 @@ module.exports = function(ret, conf, settings, opt) {
 
 	fis.util.map(ret.src, function(id, file) {
 		var _cache, htmlDepsObj, htmlAdeps, hAdeps = [],
-			hDeps, hObj, regExp, hCache, _result = {};
+			hDeps, hObj, regExp, hCache, _result = {},
+			_id;
 
 		id = id.replace(/^[\/]*/, '');
-
-		allFiles[id] = {
+		_id = pth.normalize(id);
+		allFiles[_id] = {
 			file: file,
 			rawContent: file.getContent()
 		};
@@ -67,7 +68,7 @@ module.exports = function(ret, conf, settings, opt) {
 			} else {
 
 				_result = hParser(id, file, ret, alp_conf);
-				file.setContent(_result[id].content);
+				file.setContent(_result[_id].content);
 			}
 			fis.util.merge(result, _result);
 		}
@@ -82,12 +83,15 @@ module.exports = function(ret, conf, settings, opt) {
 	
 	 */
 	function writeCache(result, file) {
+		var _k;
 		for (var k in result) {
-			cache.write(k, result[k], function(k, content) {
+			_k = k.replace(/[\/\\]/gi,'/');
+			cache.write(_k, result[k], function(k, content) {
 				var file, dep = {},
 					aFile,
 					fullname, timestamp;
 				deps = content.map.adeps;
+				k = pth.normalize(k);
 
 				aFile = allFiles[k];
 				file = aFile.file;
@@ -147,7 +151,7 @@ module.exports = function(ret, conf, settings, opt) {
 			cnt: function(src, base) {
 				var relsrc = pth.relative(base, src);
 				var content, retObj;
-				retObj = ret.ids[relsrc];
+				retObj = ret.ids[relsrc.replace(/[\/\\]/gi,'/')];
 				if (retObj) {
 					return retObj.rawContent || retObj.getContent();
 				} else {
