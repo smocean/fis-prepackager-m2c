@@ -1,6 +1,10 @@
 fis-prepackager-m2c
 ==============================
 
+自动为代码添加闭包代码，在代码编写时就无需手动添加，使得编写前端模块化代码的开发体验与Node.js一致。
+
+该插件不同于FIS内置插件fis-postprocessor-jswrapper，只是简单的添加包装，而是将代码转化成可以直接在浏览器执行的代码。
+
 ##安装与使用
 
 1.全局安装
@@ -18,7 +22,6 @@ fis.config.merge('modules.prepackager','m2c');
 fis.config.merge('settings.prepackager.m2c',{
 	options: {
 		ns: 'sm',
-		readcss: true,
 		exclude: ['**/vue.js']
 	},
 	tmpl: {
