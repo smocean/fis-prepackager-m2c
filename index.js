@@ -108,8 +108,8 @@ module.exports = function(ret, conf, settings, opt) {
 				});
 
 			});
-			ret.ids[k] && ret.ids[k].setContent(result[k].content);
-			ret.map.res[k] && (ret.map.res[k].adeps = result[k].map.adeps);
+			ret.ids[_k] && ret.ids[_k].setContent(result[k].content);
+			ret.map.res[_k] && (ret.map.res[_k].adeps = result[k].map.adeps);
 		}
 	}
 
