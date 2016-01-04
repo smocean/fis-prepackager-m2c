@@ -1,6 +1,10 @@
 {
   "name": "fis-prepackager-m2c",
+<<<<<<< HEAD
   "version": "0.0.14",
+=======
+  "version": "0.0.16",
+>>>>>>> dev
   "description": "A modular analysis tool",
   "main": "index.js",
   "scripts": {
