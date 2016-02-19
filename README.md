@@ -10,7 +10,7 @@ fis-prepackager-m2c
 1.全局安装
 
 ```bash
-npm install fis-prepackager -g
+npm install fis-prepackager-m2c -g
 ```
 
 2.开启和配置插件
