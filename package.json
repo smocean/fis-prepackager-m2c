@@ -1,0 +1,28 @@
+{
+  "name": "fis-prepackager-m2c",
+  "version": "1.0.0",
+  "description": "A modular analysis tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ybbjegj/fis-prepackager-m2c.git"
+  },
+  "author": "MingliGuo <guomilo@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ybbjegj/fis-prepackager-m2c/issues"
+  },
+  "homepage": "https://github.com/ybbjegj/fis-prepackager-m2c#readme",
+  "dependencies": {
+    "alpaca-sm": "^2.0.0"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "闭包",
+    "模块化",
+    "CommonJS"
+  ]
+}
