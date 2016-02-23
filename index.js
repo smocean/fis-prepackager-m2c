@@ -4,7 +4,7 @@ var alp = require('alpaca-sm');
 
 module.exports = function(ret, conf, settings, opt) {
     var alpConf = {},
-        cache = new Cache(!!opt.optimize),
+        cache = new Cache(!!opt.optimize, ret),
         allFiles = {};
 
     settings['isOptimizer'] = !!opt.optimize;
@@ -36,9 +36,9 @@ module.exports = function(ret, conf, settings, opt) {
         _cache = cache.read(id);
 
         //解决文件内容依赖其它文件的情况比如使用了inline方式
-        if (file.cache && !fis.util.isEmpty(file.cache.deps) && !fis.util.isEmpty(_cache) && fis.util.md5(file.getContent()) != _cache.md5) {
-            _cache = {};
-        }
+        // if (file.cache && !fis.util.isEmpty(file.cache.deps) && fis.util.isEmpty(_cache)) {
+        //     _cache = {};
+        // }
 
         if (!fis.util.isEmpty(_cache)) {
             file.rawContent = file.getContent();
