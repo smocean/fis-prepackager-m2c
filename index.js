@@ -36,9 +36,9 @@ module.exports = function(ret, conf, settings, opt) {
         _cache = cache.read(id);
 
         //解决文件内容依赖其它文件的情况比如使用了inline方式
-        // if (file.cache && !fis.util.isEmpty(file.cache.deps) && fis.util.isEmpty(_cache)) {
-        //     _cache = {};
-        // }
+        if (!file.cache || fis.util.isEmpty(_cache)) {
+            _cache = {};
+        }
 
         if (!fis.util.isEmpty(_cache)) {
             file.rawContent = file.getContent();
@@ -54,11 +54,11 @@ module.exports = function(ret, conf, settings, opt) {
                     if (retObj) {
                         return retObj.rawContent || retObj.getContent();
                     } else {
-                        return file.getContent();
+                        return file.getRawContent();
                     }
                 }
             });
-
+            file.rawContent = file.getContent();
             file.setContent(alp.storage[id].getContent());
         }
 
