@@ -94,7 +94,17 @@ module.exports = function(ret, conf, settings, opt) {
                 });
             });
             ret.ids[k] && ret.ids[k].setContent(storage[k].getContent());
-            ret.map.res[k] && (ret.map.res[k].adeps = storage[k].aRequires);
+            if (ret.map.res[k]) {
+                ret.map.res[k].adeps = storage[k].aRequires;
+            } else {
+                ret.map[k] = {
+                    type: storage[k].rExt,
+                    url: '/' + k,
+                    deps: storage[k].requires,
+                    adeps: storage[k].aRequires
+                }
+            }
+
 
         }
     }
