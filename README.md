@@ -38,6 +38,10 @@ fis.config.merge('settings.prepackager.m2c',{
     解释：排除一些已存在的使用require关键字的文件，比如用webpack或browerify打包的文件。
     类型：array | string | RegExp
     默认值：[]
+####include
+    解释：命中的文件才会被处理
+    类型：array | string | RegExp
+    默认值：[]
 ####wrapJsInHtml
     解释：是否对html中的js代码添加闭包代码
     类型：boolean

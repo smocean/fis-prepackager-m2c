@@ -5,7 +5,12 @@ var alp = require('alpaca-sm');
 module.exports = function(ret, conf, settings, opt) {
     var alpConf = {},
         cache = new Cache(!!opt.optimize, ret),
-        allFiles = {};
+        allFiles = {},
+        filename = 'm2c-op-conf.js',
+        wlPath,
+        whiteList,
+        blackList;
+
 
     settings['isOptimizer'] = !!opt.optimize;
 
@@ -13,7 +18,20 @@ module.exports = function(ret, conf, settings, opt) {
 
     alpConf.root = fis.project.getProjectPath();
 
+    wlPath = alpConf.root + '/' + filename;
+
+
+    if (fis.util.exists(wlPath)) {
+        require(wlPath);
+    }
+    whiteList = fis.config.get('m2c-white-list') || [];
+
+    blackList = fis.config.get('m2c-black-list') || [];
+
     alpConf.fileBasedRoot = true;
+
+    alpConf.include = whiteList.concat(alpConf.include || []);
+    alpConf.exclude = blackList.concat(alpConf.exclude || []);
 
     alpConf.readable = {
         css: false,
@@ -22,8 +40,11 @@ module.exports = function(ret, conf, settings, opt) {
 
     alp.config.merge(alpConf);
 
+
+
     fis.util.map(ret.src, function (id, file) {
         var _cache;
+
 
         if (!file.isHtmlLike && !file.isCssLike && !file.isJsLike) {
             return;
@@ -33,12 +54,21 @@ module.exports = function(ret, conf, settings, opt) {
             file: file,
             rawContent: file.getContent()
         };
+
+
+
+        if (!fis.util.filter(file.realpath, fis.config.get('m2c-white-list'), fis.config.get('m2c-black-list'))) {
+            cache.del(id);
+            return;
+        }
+
         _cache = cache.read(id);
 
         //解决文件内容依赖其它文件的情况比如使用了inline方式
         if (!file.cache || fis.util.isEmpty(_cache)) {
             _cache = {};
         }
+
 
         if (!fis.util.isEmpty(_cache)) {
             file.rawContent = file.getContent();
